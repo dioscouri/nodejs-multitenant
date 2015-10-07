@@ -1,0 +1,22 @@
+
+# MongoDB connection URL. Example:
+# MONGODB_URL = mongodb://user-name:password@host:27017/database
+MONGODB_URL = mongodb://127.0.0.1:27017/merchantweb
+SESSION_STORAGE=redis://127.0.0.1:6379?ttl=14400
+SESSION_SECRET=Session Secret 428
+
+SERVER_HOST=::
+SERVER_PORT=3025
+
+# Base Domain
+BASE_DOMAIN = localhost:3025
+BASE_CLIENTS_DOMAIN = localhost:3026
+SUPPORT_EMAIL = support@merchantweb.com
+BASE_URL=//localhost:3025
+SSL_ALLOWED=false
+
+# MongoDB connection properties for Tenants
+MONGODB_TENANTS_HOST = 127.0.0.1
+MONGODB_TENANTS_PORT = 27017
+
+MULTITENANT_HOST_CONTROLLER = 127.0.0.1:16580
