@@ -12,6 +12,8 @@ var DioscouriCore = process.mainModule.require('dioscouri-core');
 
 /**
  * Loader class for the model
+ *
+ * @author Eugene A. Kalosha <ekalosha@dioscouri.com>
  */
 class Loader extends DioscouriCore.AppBootstrap {
     /**
@@ -42,6 +44,13 @@ class Loader extends DioscouriCore.AppBootstrap {
 
         // Loading models
         this.applicationFacade.loadModels(__dirname + '/app/models');
+
+        // Initializing Library Exports
+        this.applicationFacade.registry.push('MultiTenant', Loader.MultiTenant);
+        this.applicationFacade.registry.push('MultiTenant.Model.Base', Loader.MultiTenant.Model.Base);
+        this.applicationFacade.registry.push('MultiTenant.Model.Client', Loader.MultiTenant.Model.Client);
+        this.applicationFacade.registry.push('MultiTenant.Model.Tenant.Base', Loader.MultiTenant.Model.Tenant.Base);
+        this.applicationFacade.registry.push('MultiTenant.Model.Tenant.Template', Loader.MultiTenant.Model.Tenant.Template);
 
         // Checking Symbolic links
         var fs = require('fs');
@@ -77,7 +86,16 @@ class Loader extends DioscouriCore.AppBootstrap {
  *
  * @type {MultiTenant|exports|module.exports}
  */
-Loader.MultiTenant = require('./lib/multitenant.js')
+Loader.MultiTenant = require('./lib/multitenant.js');
+Loader.MultiTenant.Model = {
+    Base: require('./app/models/basemodel.js'),
+    Client: require('./app/models/client.js'),
+    Tenant: {
+        Base: require('./app/models/tenant/basemodel.js'),
+        Template: require('./app/models/tenant/template.js')
+    }
+}
+Loader.DioscouriCore = DioscouriCore;
 
 /**
  * Exporting module classes and methods

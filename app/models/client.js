@@ -2,14 +2,12 @@
 "use strict";
 
 /**
- * Module dependencies.
- */
-var bcrypt = require('bcrypt-nodejs');
-
-/**
  * Requiring Core Library
+ *
+ * WARNING: Core modules MUST be included from TOP Level Module.
+ * All dependencies for core module must be excluded from the package.json
  */
-var DioscouriCore = require('dioscouri-core');
+var DioscouriCore = process.mainModule.require('dioscouri-core');
 
 /**
  * Requiring base Model
@@ -21,7 +19,7 @@ var BaseModel = require('./basemodel.js');
  *
  * @type {MultiTenant|exports|module.exports}
  */
-var MultiTenant = require('../../libs/multitenant/multitenant.js');
+var MultiTenant = require('../../lib/multitenant.js');
 
 /**
  * Require async library
@@ -33,7 +31,7 @@ var async = require('async');
 /**
  *  Client model class
  *
- *  @author Sanel Deljkic <dsanel@dioscouri.com>
+ *  @author Eugene A. Kalosha <ekalosha@dioscouri.com>
  */
 class ClientModel extends BaseModel {
     /**
@@ -53,30 +51,49 @@ class ClientModel extends BaseModel {
 
         var Types = this.mongoose.Schema.Types;
 
-        // Client Schema Object
-        var schemaObject = {
-            name: {type: String, unique: true, required: true},
-            tenantId: {type: String, unique: true, required: true},
-            subdomain: {type: String, index: true, required: true},
-            hostname: {type: String, index: true, required: false},
-            aliases: [String],
-            isEnabled: Boolean,
-            theme: String,
-            owner: {type: Types.ObjectId, ref: 'user'},
-            createdAt : {type: Date, 'default': Date.now},
-            modifiedAt : {type: Date, 'default': Date.now},
-            description: String
-        };
+        var currentSchema = null;
+        try {
+            currentSchema = this.model.schema;
+        } catch (err) {
 
-        /**
-         * Creating DBO Schema
-         */
-        var ClientDBOSchema = this.createSchema(schemaObject);
+            if ('OverwriteModelError' === err.name) {
+                this._logger.error('Model %s is already defined', this._list);
+
+                return;
+            }
+
+            if ('MissingSchemaError' !== err.name) {
+                throw err;
+            }
+
+            /**
+             * Creating DBO Schema
+             */
+            // Client Schema Object
+            var schemaObject = {
+                name: {type: String, unique: true, required: true},
+                tenantId: {type: String, unique: true, required: true},
+                subdomain: {type: String, index: true, required: true},
+                hostname: {type: String, index: true, required: false},
+                aliases: [String],
+                isEnabled: Boolean,
+                theme: String,
+                owner: {type: Types.ObjectId, ref: 'user'},
+                createdAt : {type: Date, 'default': Date.now},
+                modifiedAt : {type: Date, 'default': Date.now},
+                description: String
+            };
+
+            // Registering schema and initializing model
+            this.registerSchema(schemaObject);
+
+            currentSchema = this.model.schema;
+        }
 
         /**
          * Returns primary hostname for client
          */
-        ClientDBOSchema.methods.getPrimaryHostUrl = function () {
+        currentSchema.methods.getPrimaryHostUrl = function () {
             var result = null;
 
             if (this.hostname != null && this.hostname != '') {
@@ -93,7 +110,7 @@ class ClientModel extends BaseModel {
         /**
          * Returns subdomain hostname for client
          */
-        ClientDBOSchema.methods.getSubdomainHostUrl = function () {
+        currentSchema.methods.getSubdomainHostUrl = function () {
             var result = null;
 
             if (this.subdomain != null && this.subdomain != '') {
@@ -108,7 +125,7 @@ class ClientModel extends BaseModel {
         /**
          * Pre-save Hook for Client entity
          */
-        ClientDBOSchema.pre('save', function (next) {
+        currentSchema.pre('save', function (next) {
             this.wasNew = this.isNew;
             this.modifiedAt = new Date();
 
@@ -118,20 +135,7 @@ class ClientModel extends BaseModel {
         /**
          * Post-save Hook for Client entity
          */
-        ClientDBOSchema.post('save', function (next) {
-            if (this.wasNew) {
-                /**
-                 * Create pkgcloud container
-                 */
-                // TODO Revalidate PKG Cloud provider for Client
-                var client = new DioscouriCore.PkgClient();
-                client.client.createContainer({name: 'client_' + this._id}, function (err) {
-                    if (err) {
-                        return console.log(err.stack);
-                    }
-                });
-            }
-
+        currentSchema.post('save', function (next) {
             var tenant = this;
 
             // Updating Tenant in the system. If it is registered.
@@ -145,7 +149,7 @@ class ClientModel extends BaseModel {
         /**
          * Pre-remove Hook for Client entity
          */
-        ClientDBOSchema.pre('remove', function () {
+        currentSchema.pre('remove', function () {
             var tenant = this;
 
             // Removing Tenant from the system. If it is registered.
@@ -153,9 +157,6 @@ class ClientModel extends BaseModel {
                 ;
             });
         });
-
-        // Registering schema and initializing model
-        this.registerSchema(ClientDBOSchema);
     }
 
     /**
@@ -163,7 +164,7 @@ class ClientModel extends BaseModel {
      *
      * @param callback
      */
-    loadTenantsConfig (callback) {
+    loadTenants (callback) {
         this.model.find({}, function (error, tenants) {
             callback(error, tenants);
         });
@@ -208,7 +209,7 @@ class ClientModel extends BaseModel {
     /**
      * Find tenant config by its Hostname
      */
-    findTenantByHostname (hostname, callback) {
+    loadTenantByHost (hostname, callback) {
         var hostnameLower = hostname.toLowerCase();
         var subdomain = null;
         var domainParts = hostnameLower.split('.');

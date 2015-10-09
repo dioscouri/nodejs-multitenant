@@ -11,15 +11,11 @@ var assert = require('assert');
  * @type {exports|module.exports}
  * @private
  */
-var _init = require('./_init.js');
+var _init = require('./common/_init.js');
+var _init = require('./common/_init_database.js');
 
 // Requiring main nodejs-core lib
 var DioscouriCore = require('dioscouri-core');
-
-// Redefine default application environment
-if (process.env.APPLICATION_ENV == null) {
-    process.env.APPLICATION_ENV = 'test';
-}
 
 describe('MultiTenant', function () {
     // Requiring core library
@@ -82,6 +78,20 @@ describe('MultiTenant', function () {
 
             MultiTenant.instance.setTenantsLoader(new TenantsLoder());
             MultiTenant.instance.loadTenantsConfig(function (error, tenants) {
+                assert.equal(error, null);
+                assert.notEqual(tenants, null);
+                assert(tenants.length > 0);
+
+                done();
+            });
+        });
+
+        // Loading Tenants from Database Loader
+        it('MultiTenant loading Mongo Tenants and Initialize Tenant Servers', function (done) {
+            var tenantsLoder = DioscouriCore.ApplicationFacade.instance.registry.load('clientModel');
+            MultiTenant.instance.setConfig(DioscouriCore.ApplicationFacade.instance.config.env);
+            MultiTenant.instance.setTenantsLoader(tenantsLoder);
+            MultiTenant.instance.loadTenants(function (error, tenants) {
                 assert.equal(error, null);
                 assert.notEqual(tenants, null);
                 assert(tenants.length > 0);
