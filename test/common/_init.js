@@ -27,3 +27,52 @@ if (process.env.APPLICATION_ENV == null) {
 
 var clientModel = require('../../app/models/client.js');
 DioscouriCore.ApplicationFacade.instance.registry.push('clientModel', clientModel);
+
+function startAppServer (callback) {
+    if (global.appServerInitializationRequested == null) {
+
+        global.appServerInitializationRequested = true;
+
+        console.log('Initializing application server');
+
+        applicationFacade.on(DioscouriCore.ApplicationEvent.MONGO_CONNECTED, function (event) {
+            var locals = {};
+            console.log('Checking initial data for Admin system');
+            async.series([
+                    function (asyncCallback){
+                        asyncCallback();
+                    },
+                    function (asyncCallback){
+                        asyncCallback();
+                    }
+                ],
+                function (error) {
+                    if (error != null) {
+                        console.error('ERROR. Failed to initialize Admin tests. ', error.message);
+                    }
+                    callback();
+                });
+
+        }.bind(applicationFacade));
+
+        // Initializing server module
+        applicationFacade.load('server', DioscouriCore.HTTPServer);
+
+        // Initializing all modules
+        applicationFacade.init();
+
+        /**
+         * Loading applications
+         */
+        applicationFacade.loadApplications('module-test-config.json');
+
+        applicationFacade.run();
+    } else {
+        callback();
+    }
+}
+
+
+module.exports = {
+    startServer: startAppServer
+}

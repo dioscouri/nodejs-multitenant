@@ -11,8 +11,9 @@
         "swig": ">=1.4.2"
     },
     "devDependencies": {
-        "dioscouri-core": "git+https://github.com/dioscouri/nodejs-lib.git",
-        "mocha": ">=2.3.3"
+        "dioscouri-core": "git+https://github.com/dioscouri/nodejs-lib.git#feature-controller-definitions",
+        "mocha": ">=2.3.3",
+        "nodejs-admin": "git+https://github.com/dioscouri/nodejs-admin.git#feature-export-admin-files"
     },
     "engines": {
         "node": ">=4.1.0",
