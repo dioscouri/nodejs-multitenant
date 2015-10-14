@@ -40,7 +40,9 @@ class Loader extends DioscouriCore.AppBootstrap {
         super.init();
 
         Loader.MultiTenant.Controllers = {
-            Clients: require('./app/controllers/clients.js')
+            Admin: {
+                Clients: require('./app/controllers/admin/clients.js')
+            }
         };
 
         // Loading module routes
@@ -51,7 +53,7 @@ class Loader extends DioscouriCore.AppBootstrap {
 
         // Initializing Library Exports
         this.applicationFacade.registry.push('MultiTenant', Loader.MultiTenant);
-        this.applicationFacade.registry.push('MultiTenant.Controllers.Clients', Loader.MultiTenant.Controllers.Clients);
+        this.applicationFacade.registry.push('MultiTenant.Controllers.Admin.Clients', Loader.MultiTenant.Controllers.Admin.Clients);
         this.applicationFacade.registry.push('MultiTenant.Models.Base', Loader.MultiTenant.Models.Base);
         this.applicationFacade.registry.push('MultiTenant.Models.Client', Loader.MultiTenant.Models.Client);
         this.applicationFacade.registry.push('MultiTenant.Models.Tenant.Base', Loader.MultiTenant.Models.Tenant.Base);
@@ -61,7 +63,7 @@ class Loader extends DioscouriCore.AppBootstrap {
         var fs = require('fs');
         try {
             if (!fs.existsSync(DioscouriCore.ApplicationFacade.instance.basePath + '/public/multitenant')) {
-                fs.symlinkSync(DioscouriCore.ApplicationFacade.instance.basePath + '/public/multitenant', __dirname + '/app/public', 'dir');
+                fs.symlinkSync(DioscouriCore.ApplicationFacade.instance.basePath + '/public/multitenant', __dirname + '/public', 'dir');
             }
         } catch (error) {
             console.error('ERROR: Failed to create symbolic links for ', this._moduleName);

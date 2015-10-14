@@ -5,21 +5,24 @@
 // Requiring core assert
 var assert = require('assert');
 
-/**
- * Requiring init script for main nodejs-lib
- *
- * @type {exports|module.exports}
- * @private
- */
-var _init = require('./common/_init.js');
-var _init = require('./common/_init_database.js');
-
 // Requiring main nodejs-core lib
 var DioscouriCore = require('dioscouri-core');
 
 describe('MultiTenant', function () {
     // Requiring core library
     var MultiTenant = require('../index.js').MultiTenant;
+
+    var _init_database = require('./common/_init_database.js');
+    before(function(done){
+        _init_database.initTenantsDatabase(function (error) {
+            done();
+        })
+    });
+    after(function(done){
+        _init_database.clearTenantsDatabase(function (error) {
+            done();
+        })
+    });
 
     // Describing initial multitenant tests
     describe('initialization', function () {

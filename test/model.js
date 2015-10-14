@@ -11,7 +11,7 @@ var assert = require('assert');
  * @type {exports|module.exports}
  * @private
  */
-var _init = require('./common/_init.js');
+var _init_database = require('./common/_init_database.js');
 
 /**
  * Requiring path utils
@@ -28,6 +28,17 @@ describe('Models', function () {
     DioscouriCore.ApplicationFacade.instance.loadModels(modelsMath);
 
     var clientModel = DioscouriCore.ApplicationFacade.instance.registry.load('clientModel');
+
+    before(function(done){
+        _init_database.initTenantsDatabase(function (error) {
+            done();
+        })
+    });
+    after(function(done){
+        _init_database.clearTenantsDatabase(function (error) {
+            done();
+        })
+    });
 
     // Describing initial multitenant tests
     describe('initialization', function () {

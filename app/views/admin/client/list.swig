@@ -3,7 +3,7 @@
 {% block title %}{{ header }}{% endblock %}
 
 {% block pageheader %}
-    {% include "../partials/pageheader.swig" with { 'pageTitle': 'Clients Management'} %}
+    {% include "app/views/admin/partials/pageheader.swig" with { 'pageTitle': 'Clients Management'} %}
 {% endblock %}
 
 {% block pagecontent %}

@@ -12,6 +12,7 @@ var DioscouriCore = require('dioscouri-core');
  * @type {async|exports|module.exports}
  */
 var async = require('async');
+var path = require('path');
 
 /**
  *  Importing Application Facade and run the Application.
@@ -19,6 +20,7 @@ var async = require('async');
  *  @author Eugene A. Kalosha <ekalosha@dioscouri.com>
  */
 var applicationFacade = DioscouriCore.ApplicationFacade.instance;
+applicationFacade._basePath = path.dirname(path.dirname(__dirname));
 
 // Redefine default application environment
 if (process.env.APPLICATION_ENV == null) {

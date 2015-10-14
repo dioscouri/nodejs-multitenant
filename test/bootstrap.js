@@ -54,7 +54,7 @@ describe('Bootstrap', function () {
 
         // Controllers initialization test
         it('Controllers must be initialized', function (done) {
-            assert.notEqual(BootstrapLoader.MultiTenant.Controllers.Clients, null);
+            assert.notEqual(BootstrapLoader.MultiTenant.Controllers.Admin.Clients, null);
 
             done();
         });
@@ -72,7 +72,7 @@ describe('Bootstrap', function () {
 
         // Controllers initialization test
         it('Controllers must be exported to Registry', function (done) {
-            assert.notEqual(DioscouriCore.ApplicationFacade.instance.registry.load('MultiTenant.Controllers.Clients'), null);
+            assert.notEqual(DioscouriCore.ApplicationFacade.instance.registry.load('MultiTenant.Controllers.Admin.Clients'), null);
 
             done();
         });

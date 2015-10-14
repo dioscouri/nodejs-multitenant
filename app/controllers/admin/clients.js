@@ -15,6 +15,9 @@ var DioscouriCore = process.mainModule.require('dioscouri-core');
  */
 var AdminBaseCrudController = DioscouriCore.ApplicationFacade.instance.registry.load('Admin.Controllers.BaseCRUD');
 
+// Requiring global path utils
+var path = require('path');
+
 /**
  *  AdminClients controller
  *
@@ -35,7 +38,7 @@ class AdminClients extends AdminBaseCrudController {
          * @type {MongooseModel}
          * @private
          */
-        this._model = require('../../../models/common/client.js');
+        this._model = require('../../models/client.js');
 
         /**
          * Context of the controller
@@ -59,7 +62,7 @@ class AdminClients extends AdminBaseCrudController {
          * @type {string}
          * @private
          */
-        this._baseViewsDir = path.join(__dirname, '..', 'views', 'admin', '');
+        this._baseViewsDir = path.join(__dirname, '../..', 'views', 'admin', '');
     }
 
     /**
