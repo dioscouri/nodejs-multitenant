@@ -86,14 +86,12 @@ class ClientModel extends BaseModel {
 
             // Registering schema and initializing model
             this.registerSchema(schemaObject);
-
-            currentSchema = this.model.schema;
         }
 
         /**
          * Returns primary hostname for client
          */
-        currentSchema.methods.getPrimaryHostUrl = function () {
+        this.schema.methods.getPrimaryHostUrl = function () {
             var result = null;
 
             if (this.hostname != null && this.hostname != '') {
@@ -110,7 +108,7 @@ class ClientModel extends BaseModel {
         /**
          * Returns subdomain hostname for client
          */
-        currentSchema.methods.getSubdomainHostUrl = function () {
+        this.schema.methods.getSubdomainHostUrl = function () {
             var result = null;
 
             if (this.subdomain != null && this.subdomain != '') {
@@ -125,7 +123,7 @@ class ClientModel extends BaseModel {
         /**
          * Pre-save Hook for Client entity
          */
-        currentSchema.pre('save', function (next) {
+        this.schema.pre('save', function (next) {
             this.wasNew = this.isNew;
             this.modifiedAt = new Date();
 
@@ -135,7 +133,7 @@ class ClientModel extends BaseModel {
         /**
          * Post-save Hook for Client entity
          */
-        currentSchema.post('save', function (next) {
+        this.schema.post('save', function (next) {
             var tenant = this;
 
             // Updating Tenant in the system. If it is registered.
@@ -149,7 +147,7 @@ class ClientModel extends BaseModel {
         /**
          * Pre-remove Hook for Client entity
          */
-        currentSchema.pre('remove', function () {
+        this.schema.pre('remove', function () {
             var tenant = this;
 
             // Removing Tenant from the system. If it is registered.
@@ -187,20 +185,41 @@ class ClientModel extends BaseModel {
         }
 
         if (validationMessages.length == 0) {
-            var searchPattern = item.id != null ? {"$and": [{tenantId: item.tenantId}, {_id: {"$ne": item.id.toString()}}]} : {tenantId: item.tenantId};
+            var $this = this;
+            async.series([
+                function (asyncCallback) {
+                    var searchPattern = item.id != null ? {"$and": [{tenantId: item.tenantId}, {_id: {"$ne": item.id.toString()}}]} : {tenantId: item.tenantId};
+                    $this.model.findOne(searchPattern, function (error, document) {
+                        if (error != null) {
+                            validationMessages.push(error.message);
+                            return asyncCallback(DioscouriCore.ValidationError.create(validationMessages));
+                        }
 
-            this.model.findOne(searchPattern, function (error, document) {
-                if (error != null) {
-                    validationMessages.push(error.message);
-                    return validationCallback(DioscouriCore.ValidationError.create(validationMessages));
+                        if (document != null && (item.id == null || item.id.toString() != document.id.toString())) {
+                            validationMessages.push('Client with the same Tenant Id already exists in the database');
+                        }
+
+                        return asyncCallback(DioscouriCore.ValidationError.create(validationMessages));
+                    });
+                },
+                function (asyncCallback) {
+                    var searchPattern = item.id != null ? {"$and": [{subdomain: item.subdomain}, {_id: {"$ne": item.id.toString()}}]} : {subdomain: item.subdomain};
+                    $this.model.findOne(searchPattern, function (error, document) {
+                        if (error != null) {
+                            validationMessages.push(error.message);
+                            return asyncCallback(DioscouriCore.ValidationError.create(validationMessages));
+                        }
+
+                        if (document != null && (item.id == null || item.id.toString() != document.id.toString())) {
+                            validationMessages.push('Client with the same Subdomain already exists in the database');
+                        }
+
+                        return asyncCallback(DioscouriCore.ValidationError.create(validationMessages));
+                    });
                 }
-
-                if (document != null && (item.id == null || item.id.toString() != document.id.toString())) {
-                    validationMessages.push('Client with the same Tenant Id already exists in the database');
-                }
-
-                return validationCallback(DioscouriCore.ValidationError.create(validationMessages));
-            });
+            ], function (error) {
+                validationCallback(DioscouriCore.ValidationError.create(validationMessages));
+            })
         } else {
             validationCallback(DioscouriCore.ValidationError.create(validationMessages));
         }
@@ -211,6 +230,7 @@ class ClientModel extends BaseModel {
      */
     loadTenantByHost (hostname, callback) {
         var hostnameLower = hostname.toLowerCase();
+        console.log(hostname);
         var subdomain = null;
         var domainParts = hostnameLower.split('.');
         if (domainParts.length > 2 && domainParts[0] != 'www') {

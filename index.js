@@ -39,7 +39,7 @@ class Loader extends DioscouriCore.AppBootstrap {
     init () {
         super.init();
 
-        Loader.MultiTenant.Controllers = {
+        Loader.Controllers = {
             Admin: {
                 Clients: require('./app/controllers/admin/clients.js')
             }
@@ -53,11 +53,11 @@ class Loader extends DioscouriCore.AppBootstrap {
 
         // Initializing Library Exports
         this.applicationFacade.registry.push('MultiTenant', Loader.MultiTenant);
-        this.applicationFacade.registry.push('MultiTenant.Controllers.Admin.Clients', Loader.MultiTenant.Controllers.Admin.Clients);
-        this.applicationFacade.registry.push('MultiTenant.Models.Base', Loader.MultiTenant.Models.Base);
-        this.applicationFacade.registry.push('MultiTenant.Models.Client', Loader.MultiTenant.Models.Client);
-        this.applicationFacade.registry.push('MultiTenant.Models.Tenant.Base', Loader.MultiTenant.Models.Tenant.Base);
-        this.applicationFacade.registry.push('MultiTenant.Models.Tenant.Template', Loader.MultiTenant.Models.Tenant.Template);
+        this.applicationFacade.registry.push('MultiTenant.Controllers.Admin.Clients', Loader.Controllers.Admin.Clients);
+        this.applicationFacade.registry.push('MultiTenant.Models.Base', Loader.Models.Base);
+        this.applicationFacade.registry.push('MultiTenant.Models.Client', Loader.Models.Client);
+        this.applicationFacade.registry.push('MultiTenant.Models.Tenant.Base', Loader.Models.Tenant.Base);
+        this.applicationFacade.registry.push('MultiTenant.Models.Tenant.Template', Loader.Models.Tenant.Template);
 
         // Checking Symbolic links
         var fs = require('fs');
@@ -94,7 +94,7 @@ class Loader extends DioscouriCore.AppBootstrap {
  * @type {MultiTenant|exports|module.exports}
  */
 Loader.MultiTenant = require('./lib/multitenant.js');
-Loader.MultiTenant.Models = {
+Loader.Models = {
     Base: require('./app/models/basemodel.js'),
     Client: require('./app/models/client.js'),
     Tenant: {

@@ -30,6 +30,15 @@
         </div>
     </div>
     <div class="form-group">
+        <label class="col-sm-2 control-label">Subdomain</label>
+        <div class="col-sm-4">
+            <input type="text" placeholder="Subdomain" id="subdomain"  name="subdomain" class="form-control" value="{{ item.subdomain }}" style="text-align: right;" />
+        </div>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" name="baseDomain" placeholder="Subdomain" disabled value="{{ baseDomain }}" />
+        </div>
+    </div>
+    <div class="form-group">
         <label class="col-sm-2 control-label">Hostname Aliases</label>
         <div class="col-sm-10">
             <input type="text" placeholder="Aliases (divided by comma: ',')" name="aliases" class="form-control" value="{{ item.aliasesString }}" />
@@ -46,7 +55,7 @@
         <label class="col-sm-2 control-label"></label>
         <div class="col-sm-10">
             <button type="submit" class="btn btn-success">Save</button>
-            <button type="button" class="btn btn-default">Cancel</button>
+            <button type="button" class="btn btn-default" onclick="if (confirm('Are you sure you want to cancel save this record?')) {document.location.href = '{{ cancelUrl }}';}">Cancel</button>
         </div>
     </div>
 </form>
@@ -61,6 +70,11 @@
             event.preventDefault();
             return false;
         }
+        if (!$('#subdomain').val()) {
+            alert('Subdomain could not be empty');
+            event.preventDefault();
+            return false;
+        }
 
         return validationSummary;
     });
@@ -70,5 +84,10 @@
         var tenantIdText = $('#tenantId').val();
         var valueValidated = tenantIdText.replace(/[^a-z0-9\_\-]/gi, '').toLowerCase();
         $('#tenantId').val(valueValidated);
+    });
+    $('#subdomain').blur(function(event){
+        var subdomainText = $('#subdomain').val();
+        var valueValidated = subdomainText.replace(/[^a-z0-9\_\-]/gi, '').toLowerCase();
+        $('#subdomain').val(valueValidated);
     });
 </script>

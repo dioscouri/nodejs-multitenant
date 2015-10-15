@@ -19,9 +19,9 @@ var AdminBaseCrudController = DioscouriCore.ApplicationFacade.instance.registry.
 var path = require('path');
 
 /**
- *  AdminClients controller
+ *  Admin Clients controller
  *
- *  @author Sanel Deljkic <dsanel@dioscouri.com>
+ *  @author Eugene A. Kalosha <ekalosha@dioscouri.com>
  */
 class AdminClients extends AdminBaseCrudController {
 
@@ -66,6 +66,16 @@ class AdminClients extends AdminBaseCrudController {
     }
 
     /**
+     * Initialize data and event handlers
+     */
+    init(callback) {
+        this.data.baseDomain = '.' + DioscouriCore.ApplicationFacade.instance.config.env.BASE_CLIENTS_DOMAIN;
+        this.data.cancelUrl = this.getActionUrl('list');
+
+        super.init(callback);
+    }
+
+    /**
      * Extract item from request
      *
      * @param item
@@ -74,6 +84,10 @@ class AdminClients extends AdminBaseCrudController {
     getItemFromRequest (item) {
         var result = super.getItemFromRequest(item);
 
+        result.subdomain = this.request.body.subdomain;
+        if (result.tenantId != null  && !result.subdomain) {
+            result.subdomain = result.tenantId;
+        }
         result.name = this.request.body.name;
         result.description = this.request.body.description;
         result.isEnabled = this.request.body.isEnabled && this.request.body.isEnabled == 'on' ? true : false;

@@ -8,14 +8,6 @@
 var DioscouriCore = process.mainModule.require('dioscouri-core');
 
 /**
- * Requiring Mongoose
- *
- * @type {*|exports|module.exports}
- */
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-
-/**
  *  Base model
  *
  *  @author Eugene A. Kalosha <ekalosha@dioscouri.com>
@@ -82,7 +74,7 @@ class BaseModel extends DioscouriCore.MongooseModel {
          * @type {*|{mongo}}
          * @private
          */
-        this._schema = new Schema(this._schemaObjectDef);
+        this._schema = DioscouriCore.ApplicationFacade.instance.mongoose.Schema(this._schemaObjectDef);
 
         return this._schema;
     }

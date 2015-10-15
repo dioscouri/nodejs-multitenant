@@ -54,17 +54,17 @@ describe('Bootstrap', function () {
 
         // Controllers initialization test
         it('Controllers must be initialized', function (done) {
-            assert.notEqual(BootstrapLoader.MultiTenant.Controllers.Admin.Clients, null);
+            assert.notEqual(BootstrapLoader.Controllers.Admin.Clients, null);
 
             done();
         });
 
         // Models initialization test
         it('Models must be initialized', function (done) {
-            assert.notEqual(BootstrapLoader.MultiTenant.Models.Base, null);
-            assert.notEqual(BootstrapLoader.MultiTenant.Models.Client, null);
-            assert.notEqual(BootstrapLoader.MultiTenant.Models.Tenant.Base, null);
-            assert.notEqual(BootstrapLoader.MultiTenant.Models.Tenant.Template, null);
+            assert.notEqual(BootstrapLoader.Models.Base, null);
+            assert.notEqual(BootstrapLoader.Models.Client, null);
+            assert.notEqual(BootstrapLoader.Models.Tenant.Base, null);
+            assert.notEqual(BootstrapLoader.Models.Tenant.Template, null);
 
             done();
         });

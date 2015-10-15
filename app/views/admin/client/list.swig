@@ -35,6 +35,7 @@
                 <td>Name</td>
                 <td>Tenant ID</td>
                 <td>Description</td>
+                <td>Subdomain</td>
                 <td>Hostname</td>
                 <td>Aliases</td>
                 <td>Enabled</td>
@@ -54,6 +55,7 @@
                         <td>{{ row.name }}</td>
                         <td>{{ row.tenantId }}</td>
                         <td>{{ row.description }}</td>
+                        <td><a href="http://{{ row.subdomain }}{{ baseDomain }}" target="_blank">{{ row.subdomain }}{{ baseDomain }}</a></td>
                         <td>{{ row.hostname }}</td>
                         <td>{{ row.aliases.join(', ') }}</td>
                         <td>{{ isEnabled }}</td>

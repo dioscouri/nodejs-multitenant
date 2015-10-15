@@ -4,7 +4,6 @@
     "private": true,
     "dependencies": {
         "async": ">=1.4.0",
-        "mongoose": ">=4.1.0",
         "mongoose-types": ">=1.0.3",
         "socket.io": ">=1.3.7",
         "socket.io-client": ">=1.3.7",
@@ -13,6 +12,7 @@
     "devDependencies": {
         "dioscouri-core": "git+https://github.com/dioscouri/nodejs-lib.git#feature-controller-definitions",
         "mocha": ">=2.3.3",
+        "mongoose": ">=4.1.0",
         "nodejs-admin": "git+https://github.com/dioscouri/nodejs-admin.git#feature-export-admin-files"
     },
     "engines": {
