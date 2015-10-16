@@ -107,7 +107,7 @@ class AdminClients extends AdminBaseCrudController {
         this.data.canEditTenant = true;
 
         // Loading parent edit() method
-        super.edit(readyCallback);
+        super.create(readyCallback);
     }
 
     /**
