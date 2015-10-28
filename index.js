@@ -78,6 +78,10 @@ class Loader extends DioscouriCore.AppBootstrap {
      */
     bootstrap () {
         super.bootstrap();
+
+        // Initializing multitenant support
+        this.navigation.create({name: 'Clients', icon: 'fa-bank', order: 85});
+        this.navigation.create({name: 'Accounts', icon: 'fa-bank', url: '/admin/clients', parent: 'Clients'});
     };
 
     /**
@@ -85,6 +89,8 @@ class Loader extends DioscouriCore.AppBootstrap {
      */
     run () {
         super.run();
+
+        this.navigation = this.applicationFacade.registry.load('Admin.Models.Navigation');
     };
 }
 
