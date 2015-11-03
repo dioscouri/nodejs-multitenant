@@ -102,6 +102,16 @@ describe('MultiTenant', function () {
                 done();
             });
         });
+
+        it('MultiTenant Check tenant Workflow', function (done) {
+            var tenantInstance = MultiTenant.instance.getTenantById('test-tenant-001');
+
+            console.log('URL: ', tenantInstance.url.getUrl('tenant-url/002'));
+            assert.notEqual(tenantInstance, null);
+            assert.notEqual(tenantInstance.url, null);
+            assert.notEqual(tenantInstance.url.getUrl('tenant-url/002'), null);
+            done();
+        });
     });
 
 });

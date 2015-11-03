@@ -10,10 +10,10 @@
         "swig": ">=1.4.2"
     },
     "devDependencies": {
-        "dioscouri-core": "git+https://github.com/dioscouri/nodejs-lib.git#feature-controller-definitions",
+        "dioscouri-core": "git+https://github.com/dioscouri/nodejs-lib.git",
         "mocha": ">=2.3.3",
         "mongoose": ">=4.1.0",
-        "nodejs-admin": "git+https://github.com/dioscouri/nodejs-admin.git#feature-export-admin-files"
+        "nodejs-admin": "git+https://github.com/dioscouri/nodejs-admin.git"
     },
     "engines": {
         "node": ">=4.1.0",
