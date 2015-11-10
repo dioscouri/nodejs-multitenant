@@ -69,12 +69,14 @@ class BaseModel extends DioscouriCore.MongooseModel {
         this._schemaObjectDef = schemaObjectDef;
 
         /**
-         * Creating Schema within mongoose
+         * Creating Schema within mongoose.
+         *
+         * IMPORTANT. This MUST be Schema constructor compatible with the current Mongoose
          *
          * @type {*|{mongo}}
          * @private
          */
-        this._schema = DioscouriCore.ApplicationFacade.instance.mongoose.Schema(this._schemaObjectDef);
+        this._schema = this.mongoose.Schema(this._schemaObjectDef);
 
         return this._schema;
     }
