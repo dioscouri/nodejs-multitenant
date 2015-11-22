@@ -46,7 +46,7 @@ class AdminClients extends AdminBaseCrudController {
          * @type {string}
          * @private
          */
-        this._baseUrl = '/admin/client';
+        this._baseUrl = '/admin/clients';
 
         /**
          * Path to controller views
