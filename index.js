@@ -39,6 +39,7 @@ class Loader extends DioscouriCore.AppBootstrap {
     init () {
         super.init();
 
+        Loader.Models.User = require('./app/models/user.js');
         Loader.Controllers = {
             Admin: {
                 Clients: require('./app/controllers/admin/clients.js')

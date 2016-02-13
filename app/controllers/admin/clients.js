@@ -19,6 +19,13 @@ var AdminBaseCrudController = DioscouriCore.ApplicationFacade.instance.registry.
 var path = require('path');
 
 /**
+ * Requiring Asyns operations helper
+ *
+ * @type {async|exports|module.exports}
+ */
+var async = require('async');
+
+/**
  *  Admin Clients controller
  *
  *  @author Eugene A. Kalosha <ekalosha@dioscouri.com>
@@ -63,6 +70,14 @@ class AdminClients extends AdminBaseCrudController {
          * @private
          */
         this._baseViewsDir = path.join(__dirname, '../..', 'views', 'admin', '');
+
+        /**
+         * Owner user account
+         *
+         * @type {string}
+         * @private
+         */
+        this._modelPopulateFields = 'owner';
     }
 
     /**
@@ -73,6 +88,30 @@ class AdminClients extends AdminBaseCrudController {
         this.data.cancelUrl = this.getActionUrl('list');
 
         super.init(callback);
+    }
+
+    /**
+     * Loading item for edit actions
+     *
+     * @param readyCallback
+     */
+    preLoad(readyCallback) {
+        // Loading client data and user data
+        async.series([
+            asyncCallback => {
+                super.preLoad(asyncCallback);
+            },
+            asyncCallback => {
+                if (this.item) {
+                    this.data.userItem = this.item.owner;
+                }
+
+                asyncCallback();
+            }
+        ],
+        (error) => {
+            readyCallback(error);
+        });
     }
 
     /**
@@ -111,6 +150,15 @@ class AdminClients extends AdminBaseCrudController {
     }
 
     /**
+     * Run after create client item
+     *
+     * @param readyCallback
+     */
+    onAfterCreate (readyCallback) {
+        this.model.updateClientOwner(this.itemDetails, this.request.body.userDetails, readyCallback);
+    }
+
+    /**
      * Initialize edit view
      *
      * @param readyCallback
@@ -124,6 +172,15 @@ class AdminClients extends AdminBaseCrudController {
 
         // Loading parent edit() method
         super.edit(readyCallback);
+    }
+
+    /**
+     * Run after update client item
+     *
+     * @param readyCallback
+     */
+    onAfterEdit (readyCallback) {
+        this.model.updateClientOwner(this.itemDetails, this.request.body.userDetails, readyCallback);
     }
 
 };

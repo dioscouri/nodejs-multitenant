@@ -5,57 +5,34 @@
 {% endif %}
 
 <form action="{{ actionUrl }}" id="frmCreateOrUpdate" method="post" class="form-horizontal form-bordered">
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Client name</label>
-        <div class="col-sm-10">
-            <input type="text" placeholder="Name" name="name" class="form-control" value="{{ item.name }}" required autofocus />
+
+    <div class="row">
+        <div class="col-sm-3 col-md-3 col-lg-2">
+            <h5 class="sm-title">Detail Tabs</h5>
+            <ul class="nav nav-pills nav-stacked nav-msg">
+                <li role="presentation" class="active">
+                    <a href="#tab-client-info" aria-controls="tab-client-info" role="tab" data-toggle="tab">Client Info</a>
+                </li>
+                <li role="presentation">
+                    <a href="#tab-user-info" aria-controls="tab-user-info" role="tab" data-toggle="tab">User Info</a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-sm-9 col-md-9 col-lg-10">
+            <div class="tab-content">
+                {% include "tabs/client-info.swig" %}
+                {% include "tabs/user-info.swig" %}
+            </div>
         </div>
     </div>
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Description</label>
-        <div class="col-sm-10">
-            <input type="text" placeholder="Description" name="description" class="form-control" value="{{ item.description }}" />
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Tenant ID</label>
-        <div class="col-sm-10">
-            <input type="text" id="tenantId" placeholder="Tenant ID" name="tenantId" class="form-control" value="{{ item.tenantId }}" {{ tenantIdDisabled }} />
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Hostname</label>
-        <div class="col-sm-10">
-            <input type="text" placeholder="Hostname" name="hostname" class="form-control" value="{{ item.hostname }}" />
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Subdomain</label>
-        <div class="col-sm-4">
-            <input type="text" placeholder="Subdomain" id="subdomain"  name="subdomain" class="form-control" value="{{ item.subdomain }}" style="text-align: right;" />
-        </div>
-        <div class="col-sm-6">
-            <input type="text" class="form-control" name="baseDomain" placeholder="Subdomain" disabled value="{{ baseDomain }}" />
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Hostname Aliases</label>
-        <div class="col-sm-10">
-            <input type="text" placeholder="Aliases (divided by comma: ',')" name="aliases" class="form-control" value="{{ item.aliasesString }}" />
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="col-sm-2 control-label" for="ckbIsEnabled">Enabled</label>
-        <div class="col-sm-10">
-            {% if item.isEnabled %}{% set isChecked = ' checked' %}{% endif %}
-            <input type="checkbox" name="isEnabled" id="ckbIsEnabled" {{ isChecked }} />
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="col-sm-2 control-label"></label>
-        <div class="col-sm-10">
-            <button type="submit" class="btn btn-success">Save</button>
-            <button type="button" class="btn btn-default" onclick="if (confirm('Are you sure you want to cancel save this record?')) {document.location.href = '{{ cancelUrl }}';}">Cancel</button>
+
+    <div class="row">
+        <div class="form-group">
+            <label class="col-sm-2 control-label"></label>
+            <div class="col-sm-10">
+                <button type="submit" class="btn btn-success">Save</button>
+                <button type="button" class="btn btn-default" onclick="if (confirm('Are you sure you want to cancel save this record?')) {document.location.href = '{{ cancelUrl }}';}">Cancel</button>
+            </div>
         </div>
     </div>
 </form>

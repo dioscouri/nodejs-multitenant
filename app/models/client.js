@@ -50,6 +50,7 @@ class ClientModel extends BaseModel {
     defineSchema() {
 
         var Types = this.mongoose.Schema.Types;
+        var $this = this;
 
         var currentSchema = null;
         try {
@@ -133,14 +134,17 @@ class ClientModel extends BaseModel {
         /**
          * Post-save Hook for Client entity
          */
-        this.schema.post('save', function (next) {
+        this.schema.post('save', function (document) {
             var tenant = this;
 
             // Updating Tenant in the system. If it is registered.
             MultiTenant.instance.updateMasterTenant(tenant);
 
-            if (typeof next == "function") {
-                next();
+            // Trying to enqueue update jobs
+            if (document.wasNew) {
+                $this.enqueueClientCreateJob(document);
+            } else {
+                $this.enqueueClientUpdateJob(document);
             }
         });
 
@@ -166,6 +170,59 @@ class ClientModel extends BaseModel {
         this.model.find({}, function (error, tenants) {
             callback(error, tenants);
         });
+    }
+
+    /**
+     * Loading tenant by uid. May use hostname, subdomain, _id.
+     *
+     * @param tenantUID
+     * @param callback
+     */
+    loadTenant (tenantUID, callback) {
+        var locals = {};
+
+        async.series([
+            (asyncCallback) => {
+                this.model.findOne({_id: tenantUID}, (error, item) => {
+                    if (error != null) {
+                        return asyncCallback(error);
+                    }
+
+                    locals.result = item;
+                    asyncCallback();
+                });
+            },
+            function (asyncCallback) {
+                if (locals.result != null) {
+                    return asyncCallback();
+                }
+
+                this.model.findOne({tenantId: tenantUID}, (error, item) => {
+                    if (error != null) {
+                        return asyncCallback(error);
+                    }
+
+                    locals.result = item;
+                    asyncCallback();
+                });
+            },
+            function (asyncCallback) {
+                if (locals.result != null) {
+                    return asyncCallback();
+                }
+
+                this.model.findOne({hostname: tenantUID}, (error, item) => {
+                    if (error != null) {
+                        return asyncCallback(error);
+                    }
+
+                    locals.result = item;
+                    asyncCallback();
+                });
+            }
+        ], function (error) {
+            callback(error, locals.result);
+        })
     }
 
     /**
@@ -271,6 +328,146 @@ class ClientModel extends BaseModel {
         ], function(error) {
             callback(error, null);
         });
+    }
+
+    /**
+     * Updating/creating client details
+     *
+     * @param clientDetails
+     * @param ownerObject
+     * @param callback
+     */
+    updateClientOwner (clientDetails, ownerObject, callback) {
+        var clientUserModel = require('./user.js');
+        var locals = {};
+
+        // Loading client data and user data
+        async.series([
+            asyncCallback => {
+                if (clientDetails.owner != null) {
+                    clientUserModel.model.findById(clientDetails.owner, (error, item) => {
+                        if (error != null) {
+                            return asyncCallback(error);
+                        } else if (item == null) {
+                            return asyncCallback(new Error('Failed to find owner user for tenant.'));
+                        }
+
+                        locals.ownerDetails = item;
+                        if (locals.ownerDetails.client == null) {
+                            locals.ownerDetails.client = clientDetails.id;
+                            locals.ownerDetails.markModified('client');
+                        }
+                        asyncCallback();
+                    });
+                } else {
+                    locals.ownerDetails = new clientUserModel.model();
+                    locals.ownerDetails.client = clientDetails.id;
+                    locals.ownerDetails.markModified('client');
+                    asyncCallback();
+                }
+            },
+            asyncCallback => {
+                if (ownerObject.email != null) {
+                    if (ownerObject.password) {
+                        locals.ownerDetails.password = ownerObject.password;
+                    }
+                    if (locals.ownerDetails.name == null) {
+                        locals.ownerDetails.name = {};
+                    }
+
+                    locals.ownerDetails.name.first = ownerObject.firstName;
+                    locals.ownerDetails.name.last = ownerObject.lastName;
+                    locals.ownerDetails.email = ownerObject.email;
+
+                    locals.ownerDetails.save((error) => {
+                        if (error != null) {
+                            return asyncCallback(error);
+                        }
+
+                        locals.user = locals.ownerDetails;
+                        asyncCallback();
+                    });
+                } else {
+                    asyncCallback();
+                }
+            },
+            asyncCallback => {
+                if (clientDetails.owner == null) {
+                    clientDetails.owner = locals.ownerDetails._id;
+
+                    clientDetails.save((error) => {
+                        if (error != null) {
+                            return asyncCallback(error);
+                        }
+
+                        asyncCallback();
+                    });
+                } else {
+                    asyncCallback();
+                }
+            },
+            asyncCallback => {
+                if (locals.ownerDetails.client == null) {
+                    // For some reason we can't update client with usual save() method
+                    // Receiving error: "key $__ must not start with '$'"
+                    clientUserModel.model.update({_id: locals.ownerDetails.id}, {$set: {"client": clientDetails.id}}, (error) => {
+                        if (error != null) {
+                            console.error("#### Failed to update client (%s), for user: %s", clientDetails.id, locals.ownerDetails.id);
+                        }
+                        asyncCallback(error);
+                    });
+                } else {
+                    asyncCallback();
+                }
+            }
+        ],
+        (error) => {
+            callback(error, locals.user);
+        });
+    }
+
+    /**
+     * Enqueue client create
+     *
+     * @param clientDetails
+     */
+    enqueueClientCreateJob (clientDetails) {
+        var jobObject = {
+            workerName: 'tenant',
+            commandName: 'create',
+            params: {
+                tenantId: clientDetails.id
+            },
+            delay: new Date(new Date().getTime() + 1000 * 10),
+            priority: 1
+        };
+
+        // Enqueue new job
+        if (DioscouriCore.ApplicationFacade.instance.queue != null) {
+            DioscouriCore.ApplicationFacade.instance.queue.enqueue(jobObject);
+        }
+    }
+
+    /**
+     * Enqueue client update
+     *
+     * @param clientDetails
+     */
+    enqueueClientUpdateJob (clientDetails) {
+        var jobObject = {
+            workerName: 'tenant',
+            commandName: 'update',
+            params: {
+                tenantId: clientDetails.id
+            },
+            delay: new Date(new Date().getTime() + 1000 * 10),
+            priority: 1
+        };
+
+        // Enqueue new job
+        if (DioscouriCore.ApplicationFacade.instance.queue != null) {
+            DioscouriCore.ApplicationFacade.instance.queue.enqueue(jobObject);
+        }
     }
 }
 
