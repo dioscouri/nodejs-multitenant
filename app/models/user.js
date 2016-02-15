@@ -57,7 +57,8 @@ class ClientUserModel extends BaseModel {
         // Enqueue user Update
         this.schema.post('save', function (document) {
             // If current user is a tenant user, we should update it also
-            if (document.client != null) {
+            if (document.client != null || (document._doc != null && document._doc.client != null)) {
+                $this.logger.log('#### SCHEDULE a job to UPDATE tenant user: %s, %s', document.id, document.email);
                 $this.enqueueUpdateTenantUserJob(document);
             }
         });
@@ -65,7 +66,8 @@ class ClientUserModel extends BaseModel {
         // Enqueue user Remove
         this.schema.post('remove', function (document) {
             // If current user is a tenant user, we should update it also
-            if (document.client != null) {
+            if (document.client != null || (document._doc != null && document._doc.client != null)) {
+                $this.logger.log('#### SCHEDULE a job to REMOVE tenant user: %s, %s', document.id, document.email);
                 $this.enqueueDeleteTenantUserJob(document);
             }
         });
