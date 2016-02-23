@@ -287,7 +287,6 @@ class ClientModel extends BaseModel {
      */
     loadTenantByHost (hostname, callback) {
         var hostnameLower = hostname.toLowerCase();
-        console.log(hostname);
         var subdomain = null;
         var domainParts = hostnameLower.split('.');
         if (domainParts.length > 2 && domainParts[0] != 'www') {
@@ -354,14 +353,17 @@ class ClientModel extends BaseModel {
 
                         locals.ownerDetails = item;
                         if (locals.ownerDetails.client == null) {
-                            locals.ownerDetails.client = clientDetails.id;
+                            this.logger.debug('Client id is not defined for Tenant User. Reinitializing: %s', clientDetails._id);
+                            locals.ownerDetails.client = clientDetails._id;
+                            locals.ownerDetails._doc['client'] = clientDetails._id;
                             locals.ownerDetails.markModified('client');
                         }
                         asyncCallback();
                     });
                 } else {
                     locals.ownerDetails = new clientUserModel.model();
-                    locals.ownerDetails.client = clientDetails.id;
+                    locals.ownerDetails.client = clientDetails._id;
+                    locals.ownerDetails._doc['client'] = clientDetails._id;
                     locals.ownerDetails.markModified('client');
                     asyncCallback();
                 }
@@ -412,7 +414,9 @@ class ClientModel extends BaseModel {
                     // Receiving error: "key $__ must not start with '$'"
                     clientUserModel.model.update({_id: locals.ownerDetails.id}, {$set: {"client": clientDetails.id}}, (error) => {
                         if (error != null) {
-                            console.error("#### Failed to update client (%s), for user: %s", clientDetails.id, locals.ownerDetails.id);
+                            this.logger.error("#### Failed to update client (%s), for user: %s", clientDetails.id, locals.ownerDetails.id);
+                        } else {
+                            this.logger.debug('#### Successfully updated client (%s) for tenant user: %s', clientDetails.id, locals.ownerDetails.id);
                         }
                         asyncCallback(error);
                     });
@@ -422,6 +426,9 @@ class ClientModel extends BaseModel {
             }
         ],
         (error) => {
+            if (error) {
+                this.logger.error('Failed to update client owner: ', error.message);
+            }
             callback(error, locals.user);
         });
     }

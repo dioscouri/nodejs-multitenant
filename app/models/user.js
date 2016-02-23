@@ -52,13 +52,15 @@ class ClientUserModel extends BaseModel {
         this.schema.add({
             "client": {type: this.mongoose.Schema.Types.ObjectId, ref: 'client'}
         });
+        this._model = this.mongoose.model('user', this.schema);
         // this.schema.path("client", {type: this.mongoose.Schema.Types.ObjectId, ref: 'client'});
+        // console.log(this.schema);
 
         // Enqueue user Update
         this.schema.post('save', function (document) {
             // If current user is a tenant user, we should update it also
             if (document.client != null || (document._doc != null && document._doc.client != null)) {
-                $this.logger.log('#### SCHEDULE a job to UPDATE tenant user: %s, %s', document.id, document.email);
+                $this.logger.log('#### SCHEDULE a job to UPDATE tenant user: %s, %s, %s', document.id, document.email, document._doc.client);
                 $this.enqueueUpdateTenantUserJob(document);
             }
         });
